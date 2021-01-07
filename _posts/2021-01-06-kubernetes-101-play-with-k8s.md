@@ -107,3 +107,84 @@ To verify, run the `kubectl get nodes -o wide` command on the master node, and w
 
 ![image](/assets/img/post/container/kubernetes/play-with-k8s/13.png)
 
+## Install Web Application
+We will use the following `nginx-app.yaml` file to install a web application (Nginx) to our Kubernetes cluster:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx-svc
+  labels:
+    app: nginx
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+```
+
+Without going into too much detail, the above file will basically create a LoadBalancer Service to expose the web app using the public IP and deploy 3 replica of Nginx servers.
+
+Let's use the following command to deploy the YAML file: 
+
+```console
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/nginx-app.yaml
+```
+
+![image](/assets/img/post/container/kubernetes/play-with-k8s/14.png)
+
+To verify, run the following command to check the create Nginx servers in the worker nodes:
+
+```console
+kubectl get pods -o wide
+```
+
+3 replicas of the Nginx servers are successfully created. (2 in Node2 and 1 in Node3)
+
+![image](/assets/img/post/container/kubernetes/play-with-k8s/15.png)
+
+And run the following command to check the LoadBalancer creation:
+
+```console
+kubectl get svc -o wide
+```
+
+We can see the created the LoadBalancer service, and it is using the port 30736/TCP to expose the Nginx server to the public. 
+
+>**Note:** Kubernetes service will pick random ports between 30000 and 32767 by default unless a port is specified in the deployment script. 
+
+![image](/assets/img/post/container/kubernetes/play-with-k8s/16.png)
+
+## Accessing the Web App
+Now, using the public URL for the lab instance + using the port 30736, let's visit the Nginx site via browser.
+
+![image](/assets/img/post/container/kubernetes/play-with-k8s/17.png)
+
+![image](/assets/img/post/container/kubernetes/play-with-k8s/18.png)
+
+# Conclusion
+Using Play with Kubernetes lab, I demonstrated the quick setup of Kubernetes cluster + running web application within. This was really simple exercise, and it is not even 1/1000 of what Kubernetes can do. However, I think it is a great start to get your feet wet for Kubernetes at least. Cheers!
