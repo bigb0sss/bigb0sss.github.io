@@ -5,7 +5,6 @@ date: 2020-11-19 23:36:00 +0800
 categories: [RedTeam, Infrastructure]
 tags: [aws, api gateway, cloud, rotate ip, redteam]
 image: /assets/img/post/redteam/infra/cloud/aws/logo.png
-pin: true
 ---
 
 # Intro

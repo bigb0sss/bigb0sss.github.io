@@ -5,7 +5,6 @@ date: 2020-10-23 23:25:00 +0800
 categories: [RedTeam, Cobalt Strike]
 tags: [cobalt strike, malleable c2, redteam]
 image: /assets/img/post/redteam-cobalt-strike/cs2.png
-pin: true
 ---
 
 ## Intro
