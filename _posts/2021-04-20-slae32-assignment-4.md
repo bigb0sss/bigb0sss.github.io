@@ -17,6 +17,7 @@ image: /assets/img/post/slae32/slae32.png
 
 # Assignement #4 
 * Create a custom encoding scheme like the "Insertion Encoder"
+* PoC with using execve-stack as the shellcode to encode with your schema and execute
 
 # Custom Encoder
 An encoder can be used fro various purposes. For example, Base64 encodes binary data into an ASCII characters which are known to pretty much every computer system. Or one may use an encoder to mangle their code to potentially bypass a security product such as AV. Today, I will demonstrate a simple custom econding scheme for a x86 shellcode. 
