@@ -74,8 +74,8 @@ Let's analyze the disassembled payload.
 
 ```nasm
 
-00000000  6A0B              push byte +0xb  							; Pushing a single byte 0xb. 0xb = 11 in decimal which is "Execve" syscall in the unistd_32.h library. 
-																		;
+00000000  6A0B              push byte +0xb	; Pushing a single byte 0xb. 0xb = 11 in decimal which is "Execve" syscall in the unistd_32.h library. 
+	;
 																		; # cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep 11
 																		; #define __NR_execve 11
 
