@@ -72,62 +72,7 @@ Then, we will use `ndisasm` - the Netwide Disassembler - to disassemble the crea
 
 Let's analyze the disassembled payload.
 
-```nasm
-
-00000000  6A0B              push byte +0xb	; Pushing a single byte 0xb. 0xb = 11 in decimal which is "Execve" syscall in the unistd_32.h library. 
-	;
-																		; # cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep 11
-																		; #define __NR_execve 11
-
-00000002  58                pop eax										; [EAX = 0xb] Storing the single byte 0xb into the EAX register so that we can call "Execve" from the EAX register.
-																		;
-																		; ================================ Execve Layout Example ================================
-																		; int execve(const char *filename, char *const argv[], char *const envp[]);
-																		;            -------- EBX -------- ------- ECX ------- ------- EDX --------
-																		;                      ⬇                   ⬇                  ⬇
-																		;                  "filename"       "Addr of filename"     "0x00000000"
-																		; =======================================================================================
-
-00000003  99                cdq											; [EDX = 0x0] Zeroing out the EDX register by copying the sign bit in the EAX register to every bit position in the EDX. (Since no sign bit is set in EAX, all value is 0)
-
-00000004  52                push edx 									; Pushing EDX (0x0) onto the stack
-
-00000005  66682D63          push word 0x632d							; Pushing 0x632d ('-c') onto the stack
-																		;
-																		; >>> print('\x63\x2d')
-																		; c-
-
-00000009  89E7              mov edi,esp									; [EDI = '-c'] Moving current stack (ESP = '-c') into the EDI register 
-
-0000000B  682F736800        push dword 0x68732f							; Pushing 0x68732f ('/sh') onto the stack
-																		;
-																		; >>> print('\x68\x73\x2f')
-																		; hs/
-
-00000010  682F62696E        push dword 0x6e69622f						; Pushing 0x6e69622f ('/bin') onto the stack
-																		;
-																		; >>> print('\x6e\x69\x62\x2f')
-																		; nib/
-
-00000015  89E3              mov ebx,esp 								; [EBX = '/bin/sh'] Moving current stack (ESP = '/bin/sh') into the EBX register
-
-00000017  52                push edx 									; Pushing EDX (0x0) onto the stack
-
-00000018  E803000000        call 0x20									; Pushing the return address (0x20) onto the stack --> which is \x57\x53\x89\xE1\xCD\x80
-
-0000001D  696400575389E1CD  imul esp,[eax+eax+0x57],dword 0xcde18953	; 0x696400 = 'id' + null terminator
-																		;
-00000025  80                db 0x80										; 0x575389E1CD80 --> Disassmble it with ndisasm again:
-																		; 
-																		; # echo -ne "\x57\x53\x89\xE1\xCD\x80" | ndisasm -b 32 -
-																		; 00000000  57                push edi 						; Pushing EDI ('-c') onto the stack
-																		; 00000001  53                push ebx 						; Pushing EBX ('/bin/sh') onto the stack
-																		; 00000002  89E1              mov ecx,esp 					; [ECX = '/bin/sh' '-c' 'id' '0x0'] Moving the current stack (ESP) to ECX
-																		; 00000004  CD80              int 0x80 						; Handle system_call --> "Execve"
-																		;
-																		; Syscall: [EAX = 0xb = execve] [EBX = '/bin/sh'] [ECX = '/bin/sh' '-c' 'id' '0x0'] [EDX = 0x0]
-```
-
+![image](/assets/img/post/slae32/assignment5/01.png)
 
 
 
